@@ -156,7 +156,7 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 			$sql .= ' USING ('.implode(', ', array_map(array($db, 'quote_column'), $this->_using)).')';
 		}
 		else{
-			$sql .= $this->_compile_conditions($db, $this->_on);
+			$sql .= ' ON ' . $this->_compile_conditions($db, $this->_on);
 
 		}
 	
@@ -232,10 +232,8 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 				$last_condition = $condition;
 			}
 		}
-
-		return $sql;
 	}
-
+	
 	/**
 	 * Creates a new JOIN statement for a table. Optionally, the type of JOIN
 	 * can be specified as the second parameter.
