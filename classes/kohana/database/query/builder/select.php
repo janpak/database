@@ -130,6 +130,78 @@ class Kohana_Database_Query_Builder_Select extends Database_Query_Builder_Where 
 	}
 
 	/**
+	 * Alias of and_join_open()
+	 *
+	 * @return  $this
+	 */
+	public function join_open()
+	{
+		 $this->_last_join->join_open();
+
+		 return $this;
+	}
+
+	/**
+	 * Opens a new "AND WHERE (...)" grouping.
+	 *
+	 * @return  $this
+	 */
+	public function and_join_open()
+	{
+		$this->_last_join->and_join_open();
+
+		return $this;
+	}
+
+	/**
+	 * Opens a new "OR WHERE (...)" grouping.
+	 *
+	 * @return  $this
+	 */
+	public function or_join_open()
+	{
+		$this->_last_join->or_join_open();
+
+		return $this;
+	}
+
+	/**
+	 * Closes an open "AND WHERE (...)" grouping.
+	 *
+	 * @return  $this
+	 */
+	public function join_close()
+	{
+		$this->_last_join->join_close();
+
+		return $this;
+	}
+
+	/**
+	 * Closes an open "AND WHERE (...)" grouping.
+	 *
+	 * @return  $this
+	 */
+	public function and_join_close()
+	{
+		$this->_last_join->and_join_close();
+
+		return $this;
+	}
+
+	/**
+	 * Closes an open "OR WHERE (...)" grouping.
+	 *
+	 * @return  $this
+	 */
+	public function or_join_close()
+	{
+		$this->_last_join->or_join_close();
+
+		return $this;
+	}
+
+	/**
 	 * Adds "ON ..." conditions for the last created JOIN statement.
 	 *
 	 * @param   mixed   column name or array($column, $alias) or object
@@ -137,9 +209,9 @@ class Kohana_Database_Query_Builder_Select extends Database_Query_Builder_Where 
 	 * @param   mixed   column name or array($column, $alias) or object
 	 * @return  $this
 	 */
-	public function on($c1, $op, $c2)
+	public function on($c1, $op, $c2,$conjunction='AND')
 	{
-		$this->_last_join->on($c1, $op, $c2);
+		$this->_last_join->on($c1, $op, $c2,$conjunction);
 
 		return $this;
 	}
