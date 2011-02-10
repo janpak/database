@@ -128,13 +128,13 @@ class Kohana_Database_Query_Builder_Select extends Database_Query_Builder_Where 
 	}
 
 	/**
-	 * Alias of and_join_open()
+	 * Alias of and_on_open()
 	 *
 	 * @return  $this
 	 */
-	public function join_open()
+	public function on_open()
 	{
-		 $this->_last_join->join_open();
+		 $this->_last_join->on_open();
 
 		 return $this;
 	}
@@ -144,9 +144,9 @@ class Kohana_Database_Query_Builder_Select extends Database_Query_Builder_Where 
 	 *
 	 * @return  $this
 	 */
-	public function and_join_open()
+	public function and_on_open()
 	{
-		$this->_last_join->and_join_open();
+		$this->_last_join->and_on_open();
 
 		return $this;
 	}
@@ -156,9 +156,9 @@ class Kohana_Database_Query_Builder_Select extends Database_Query_Builder_Where 
 	 *
 	 * @return  $this
 	 */
-	public function or_join_open()
+	public function or_on_open()
 	{
-		$this->_last_join->or_join_open();
+		$this->_last_join->or_on_open();
 
 		return $this;
 	}
@@ -168,9 +168,9 @@ class Kohana_Database_Query_Builder_Select extends Database_Query_Builder_Where 
 	 *
 	 * @return  $this
 	 */
-	public function join_close()
+	public function on_close()
 	{
-		$this->_last_join->join_close();
+		$this->_last_join->on_close();
 
 		return $this;
 	}
@@ -180,9 +180,9 @@ class Kohana_Database_Query_Builder_Select extends Database_Query_Builder_Where 
 	 *
 	 * @return  $this
 	 */
-	public function and_join_close()
+	public function and_on_close()
 	{
-		$this->_last_join->and_join_close();
+		$this->_last_join->and_on_close();
 
 		return $this;
 	}
@@ -192,15 +192,15 @@ class Kohana_Database_Query_Builder_Select extends Database_Query_Builder_Where 
 	 *
 	 * @return  $this
 	 */
-	public function or_join_close()
+	public function or_on_close()
 	{
-		$this->_last_join->or_join_close();
+		$this->_last_join->or_on_close();
 
 		return $this;
 	}
 
 	/**
-	 * Adds "ON ..." conditions for the last created JOIN statement.
+	 * Adds "ON ... AND " conditions for the last created JOIN statement.
 	 *
 	 * @param   mixed   column name or array($column, $alias) or object
 	 * @param   string  logic operator
@@ -214,6 +214,21 @@ class Kohana_Database_Query_Builder_Select extends Database_Query_Builder_Where 
 		return $this;
 	}
 
+	/**
+	 * Adds "ON ... OR " conditions for the last created JOIN statement.
+	 *
+	 * @param   mixed   column name or array($column, $alias) or object
+	 * @param   string  logic operator
+	 * @param   mixed   column name or array($column, $alias) or object
+	 * @return  $this
+	 */
+
+	public function or_on($c1,$op,$c2){
+		$this->_last_join->on($c1,$op,$c2,'OR');
+
+		return $this;
+
+	}
 	/**
 	 * Adds "USING ..." conditions for the last created JOIN statement.
 	 *

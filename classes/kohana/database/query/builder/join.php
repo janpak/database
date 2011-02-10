@@ -23,13 +23,13 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 	protected $_using = array();
 
 	/**
-	 * Alias of and_join_open()
+	 * Alias of and_on_open()
 	 *
 	 * @return  $this
 	 */
-	public function join_open()
+	public function on_open()
 	{
-		return $this->and_join_open();
+		return $this->and_on_open();
 	}
 
 	/**
@@ -37,7 +37,7 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 	 *
 	 * @return  $this
 	 */
-	public function and_join_open()
+	public function and_on_open()
 	{
 		$this->_on[] = array('AND' => '(');
 
@@ -49,7 +49,7 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 	 *
 	 * @return  $this
 	 */
-	public function or_join_open()
+	public function or_on_open()
 	{
 		$this->_on[] = array('OR' => '(');
 
@@ -61,9 +61,9 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 	 *
 	 * @return  $this
 	 */
-	public function join_close()
+	public function on_close()
 	{
-		return $this->and_join_close();
+		return $this->and_on_close();
 	}
 
 	/**
@@ -71,7 +71,7 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 	 *
 	 * @return  $this
 	 */
-	public function and_join_close()
+	public function and_on_close()
 	{
 		$this->_on[] = array('AND' => ')');
 
@@ -83,7 +83,7 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 	 *
 	 * @return  $this
 	 */
-	public function or_join_close()
+	public function or_on_close()
 	{
 		$this->_on[] = array('OR' => ')');
 
@@ -100,11 +100,11 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 	 */
 	public function on($c1, $op, $c2,$conjunction = 'AND')
 	{
+
 		if ( ! empty($this->_using))
 		{
 			throw new Kohana_Exception('JOIN ... ON ... cannot be combined with JOIN ... USING ...');
 		}
-
 		$this->_on[] = array($conjunction => array($c1, $op, $c2));
 
 		return $this;
@@ -130,7 +130,6 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 
 		return $this;
 	}
-
 	/**
 	 * Compile the SQL partial for a JOIN statement and return it.
 	 *
@@ -156,7 +155,7 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 			$sql .= ' '.$db->quote_table($this->_table).' ON ';
 		}
 		
-		$sql .= parent::_compile_conditions($db, $this->_on);
+		$sql .= $this->_compile_conditions($db, $this->_on);
 	
 		return $sql;
 	}
