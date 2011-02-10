@@ -128,20 +128,107 @@ class Kohana_Database_Query_Builder_Select extends Database_Query_Builder_Where 
 	}
 
 	/**
-	 * Adds "ON ..." conditions for the last created JOIN statement.
+	 * Alias of and_on_open()
+	 *
+	 * @return  $this
+	 */
+	public function on_open()
+	{
+		 $this->_last_join->on_open();
+
+		 return $this;
+	}
+
+	/**
+	 * Opens a new "AND WHERE (...)" grouping.
+	 *
+	 * @return  $this
+	 */
+	public function and_on_open()
+	{
+		$this->_last_join->and_on_open();
+
+		return $this;
+	}
+
+	/**
+	 * Opens a new "OR WHERE (...)" grouping.
+	 *
+	 * @return  $this
+	 */
+	public function or_on_open()
+	{
+		$this->_last_join->or_on_open();
+
+		return $this;
+	}
+
+	/**
+	 * Closes an open "AND WHERE (...)" grouping.
+	 *
+	 * @return  $this
+	 */
+	public function on_close()
+	{
+		$this->_last_join->on_close();
+
+		return $this;
+	}
+
+	/**
+	 * Closes an open "AND WHERE (...)" grouping.
+	 *
+	 * @return  $this
+	 */
+	public function and_on_close()
+	{
+		$this->_last_join->and_on_close();
+
+		return $this;
+	}
+
+	/**
+	 * Closes an open "OR WHERE (...)" grouping.
+	 *
+	 * @return  $this
+	 */
+	public function or_on_close()
+	{
+		$this->_last_join->or_on_close();
+
+		return $this;
+	}
+
+	/**
+	 * Adds "ON ... AND " conditions for the last created JOIN statement.
 	 *
 	 * @param   mixed   column name or array($column, $alias) or object
 	 * @param   string  logic operator
 	 * @param   mixed   column name or array($column, $alias) or object
 	 * @return  $this
 	 */
-	public function on($c1, $op, $c2)
+	public function on($c1, $op, $c2,$conjunction='AND')
 	{
-		$this->_last_join->on($c1, $op, $c2);
+		$this->_last_join->on($c1, $op, $c2,$conjunction);
 
 		return $this;
 	}
 
+	/**
+	 * Adds "ON ... OR " conditions for the last created JOIN statement.
+	 *
+	 * @param   mixed   column name or array($column, $alias) or object
+	 * @param   string  logic operator
+	 * @param   mixed   column name or array($column, $alias) or object
+	 * @return  $this
+	 */
+
+	public function or_on($c1,$op,$c2){
+		$this->_last_join->on($c1,$op,$c2,'OR');
+
+		return $this;
+
+	}
 	/**
 	 * Adds "USING ..." conditions for the last created JOIN statement.
 	 *

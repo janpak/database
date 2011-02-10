@@ -23,23 +23,71 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 	protected $_using = array();
 
 	/**
-	 * Creates a new JOIN statement for a table. Optionally, the type of JOIN
-	 * can be specified as the second parameter.
+	 * Alias of and_on_open()
 	 *
-	 * @param   mixed   column name or array($column, $alias) or object
-	 * @param   string  type of JOIN: INNER, RIGHT, LEFT, etc
-	 * @return  void
+	 * @return  $this
 	 */
-	public function __construct($table, $type = NULL)
+	public function on_open()
 	{
-		// Set the table to JOIN on
-		$this->_table = $table;
+		return $this->and_on_open();
+	}
 
-		if ($type !== NULL)
-		{
-			// Set the JOIN type
-			$this->_type = (string) $type;
-		}
+	/**
+	 * Opens a new "AND WHERE (...)" grouping.
+	 *
+	 * @return  $this
+	 */
+	public function and_on_open()
+	{
+		$this->_on[] = array('AND' => '(');
+
+		return $this;
+	}
+
+	/**
+	 * Opens a new "OR WHERE (...)" grouping.
+	 *
+	 * @return  $this
+	 */
+	public function or_on_open()
+	{
+		$this->_on[] = array('OR' => '(');
+
+		return $this;
+	}
+
+	/**
+	 * Closes an open "AND WHERE (...)" grouping.
+	 *
+	 * @return  $this
+	 */
+	public function on_close()
+	{
+		return $this->and_on_close();
+	}
+
+	/**
+	 * Closes an open "AND WHERE (...)" grouping.
+	 *
+	 * @return  $this
+	 */
+	public function and_on_close()
+	{
+		$this->_on[] = array('AND' => ')');
+
+		return $this;
+	}
+
+	/**
+	 * Closes an open "OR WHERE (...)" grouping.
+	 *
+	 * @return  $this
+	 */
+	public function or_on_close()
+	{
+		$this->_on[] = array('OR' => ')');
+
+		return $this;
 	}
 
 	/**
@@ -50,14 +98,16 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 	 * @param   mixed   column name or array($column, $alias) or object
 	 * @return  $this
 	 */
-	public function on($c1, $op, $c2)
+	public function on($c1, $op, $c2,$conjunction = 'AND')
 	{
+
 		if ( ! empty($this->_using))
 		{
 			throw new Kohana_Exception('JOIN ... ON ... cannot be combined with JOIN ... USING ...');
 		}
 
-		$this->_on[] = array($c1, $op, $c2);
+
+		$this->_on[] = array($conjunction => array($c1, $op, $c2));
 
 		return $this;
 	}
@@ -82,7 +132,6 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 
 		return $this;
 	}
-
 	/**
 	 * Compile the SQL partial for a JOIN statement and return it.
 	 *
@@ -99,39 +148,42 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 		{
 			$sql = 'JOIN';
 		}
-
-		// Quote the table name that is being joined
-		$sql .= ' '.$db->quote_table($this->_table);
-
-		if ( ! empty($this->_using))
-		{
-			// Quote and concat the columns
-			$sql .= ' USING ('.implode(', ', array_map(array($db, 'quote_column'), $this->_using)).')';
+		if(is_array($this->_table) && ($this->_table[0] instanceof Kohana_Database_Query)){
+			// Quote the table name that is being joined
+			$sql .= ' ( '.$this->_table[0].' ) AS `'.$this->_table[1].'` ON ';
 		}
-		else
-		{
-			$conditions = array();
-			foreach ($this->_on as $condition)
-			{
-				// Split the condition
-				list($c1, $op, $c2) = $condition;
-
-				if ($op)
-				{
-					// Make the operator uppercase and spaced
-					$op = ' '.strtoupper($op);
-				}
-
-				// Quote each of the columns used for the condition
-				$conditions[] = $db->quote_column($c1).$op.' '.$db->quote_column($c2);
-			}
-
-			// Concat the conditions "... AND ..."
-			$sql .= ' ON ('.implode(' AND ', $conditions).')';
+		else{
+			// Quote the table name that is being joined
+			$sql .= ' '.$db->quote_table($this->_table).' ON ';
 		}
-
+		
+		$sql .= $this->_compile_conditions($db, $this->_on);
+	
 		return $sql;
 	}
+
+
+
+	/**
+	 * Creates a new JOIN statement for a table. Optionally, the type of JOIN
+	 * can be specified as the second parameter.
+	 *
+	 * @param   mixed   column name or array($column, $alias) or object
+	 * @param   string  type of JOIN: INNER, RIGHT, LEFT, etc
+	 * @return  void
+	 */
+	public function __construct($table, $type = NULL)
+	{
+		// Set the table to JOIN on
+		$this->_table = $table;
+
+		if ($type !== NULL)
+		{
+			// Set the JOIN type
+			$this->_type = (string) $type;
+		}
+	}
+	
 
 	public function reset()
 	{
