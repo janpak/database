@@ -23,13 +23,13 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 	protected $_using = array();
 
 	/**
-	 * Alias of and_join_open()
+	 * Alias of and_on_open()
 	 *
 	 * @return  $this
 	 */
-	public function join_open()
+	public function on_open()
 	{
-		return $this->and_join_open();
+		return $this->and_on_open();
 	}
 
 	/**
@@ -37,7 +37,7 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 	 *
 	 * @return  $this
 	 */
-	public function and_join_open()
+	public function and_on_open()
 	{
 		$this->_on[] = array('AND' => '(');
 
@@ -49,7 +49,7 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 	 *
 	 * @return  $this
 	 */
-	public function or_join_open()
+	public function or_on_open()
 	{
 		$this->_on[] = array('OR' => '(');
 
@@ -61,9 +61,9 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 	 *
 	 * @return  $this
 	 */
-	public function join_close()
+	public function on_close()
 	{
-		return $this->and_join_close();
+		return $this->and_on_close();
 	}
 
 	/**
@@ -71,7 +71,7 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 	 *
 	 * @return  $this
 	 */
-	public function and_join_close()
+	public function and_on_close()
 	{
 		$this->_on[] = array('AND' => ')');
 
@@ -83,7 +83,7 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 	 *
 	 * @return  $this
 	 */
-	public function or_join_close()
+	public function or_on_close()
 	{
 		$this->_on[] = array('OR' => ')');
 
@@ -91,7 +91,7 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 	}
 
 	/**
-	 * Adds a new condition for joining.
+	 * Adds a new AND condition for joining.
 	 *
 	 * @param   mixed   column name or array($column, $alias) or object
 	 * @param   string  logic operator
@@ -108,6 +108,22 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 		$this->_on[] = array($conjunction => array($c1, $op, $c2));
 
 		return $this;
+	}
+
+	/**
+	 * Adds a new OR condition for joining.
+	 *
+	 * @param   mixed   column name or array($column, $alias) or object
+	 * @param   string  logic operator
+	 * @param   mixed   column name or array($column, $alias) or object
+	 * @return  $this
+	 */
+	public function or_on( $c1, $op, $c2 )
+	{
+		$this->on($c1,$op,$c2,'OR');
+
+		return $this;
+
 	}
 
 	/**
@@ -156,7 +172,7 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 			$sql .= ' USING ('.implode(', ', array_map(array($db, 'quote_column'), $this->_using)).')';
 		}
 		else{
-			$sql .= ' ON ' . $this->_compile_conditions($db, $this->_on);
+			$sql .= ' ON '. $this->_compile_conditions($db, $this->_on);
 
 		}
 	
@@ -232,8 +248,10 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 				$last_condition = $condition;
 			}
 		}
+
+		return $sql;
 	}
-	
+
 	/**
 	 * Creates a new JOIN statement for a table. Optionally, the type of JOIN
 	 * can be specified as the second parameter.
