@@ -164,6 +164,79 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 	}
 
 	/**
+	 * Compiles an array of conditions into an SQL partial. Used for WHERE
+	 * and HAVING.
+	 *
+	 * @param   object  Database instance
+	 * @param   array   condition statements
+	 * @return  string
+	 */
+	protected function _compile_conditions(Database $db, array $conditions)
+	{
+		$last_condition = NULL;
+
+		$sql = '';
+		foreach ($conditions as $group)
+		{
+			// Process groups of conditions
+			foreach ($group as $logic => $condition)
+			{
+				if ($condition === '(')
+				{
+					if ( ! empty($sql) AND $last_condition !== '(')
+					{
+						// Include logic operator
+						$sql .= ' '.$logic.' ';
+					}
+
+					$sql .= '(';
+				}
+				elseif ($condition === ')')
+				{
+					$sql .= ')';
+				}
+				else
+				{
+					if ( ! empty($sql) AND $last_condition !== '(')
+					{
+						// Add the logic operator
+						$sql .= ' '.$logic.' ';
+					}
+
+					// Split the condition
+					list($column, $op, $column2) = $condition;
+
+					// Database operators are always uppercase
+					$op = strtoupper($op);
+					
+
+					if ($column)
+					{
+						// Apply proper quoting to the column
+						$column = $db->quote_column($column);
+					}
+
+					if(is_string($column2) ){
+						// Apply proper quoting to the column
+						$column2 = $db->quote_column($column2);
+					}
+					else if(is_array($column2)){
+						$column2 = $db->quote($column2);
+
+					}
+
+					// Append the statement to the query
+					$sql .= trim($column.' '.$op.' '.$column2);
+				}
+
+				$last_condition = $condition;
+			}
+		}
+
+		return $sql;
+	}
+
+	/**
 	 * Creates a new JOIN statement for a table. Optionally, the type of JOIN
 	 * can be specified as the second parameter.
 	 *
