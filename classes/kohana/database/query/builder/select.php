@@ -215,7 +215,7 @@ class Kohana_Database_Query_Builder_Select extends Database_Query_Builder_Where 
 	}
 
 	/**
-	 * Adds "ON ... OR" conditions for the last created JOIN statement.
+	 * Adds "ON ... OR " conditions for the last created JOIN statement.
 	 *
 	 * @param   mixed   column name or array($column, $alias) or object
 	 * @param   string  logic operator
@@ -228,7 +228,6 @@ class Kohana_Database_Query_Builder_Select extends Database_Query_Builder_Where 
 
 			return $this;
 	}
-
 
 	/**
 	 * Adds "USING ..." conditions for the last created JOIN statement.

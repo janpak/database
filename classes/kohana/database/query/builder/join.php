@@ -42,6 +42,7 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 		$this->_on[] = array('AND' => '(');
 
 		return $this;
+
 	}
 
 	/**
@@ -89,6 +90,7 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 
 		return $this;
 	}
+	
 
 	/**
 	 * Adds a new AND condition for joining.
@@ -100,6 +102,7 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 	 */
 	public function on($c1, $op, $c2,$conjunction = 'AND')
 	{
+
 		if ( ! empty($this->_using))
 		{
 			throw new Kohana_Exception('JOIN ... ON ... cannot be combined with JOIN ... USING ...');
@@ -145,7 +148,6 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 		$this->_using = array_merge($this->_using, $columns);
 
 	}
-
 	/**
 	 * Compile the SQL partial for a JOIN statement and return it.
 	 *
@@ -225,7 +227,6 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 					// Database operators are always uppercase
 					$op = strtoupper($op);
 					
-
 					if ($column)
 					{
 						// Apply proper quoting to the column
