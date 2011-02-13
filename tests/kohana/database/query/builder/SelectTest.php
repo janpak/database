@@ -11,15 +11,42 @@ class Kohana_Database_Query_Builder_SelectTest extends Kohana_DatabaseTest{
 					array('foo','bar'),//from
 					array(
 						array('join_table1','on',array('join_table1.col1','=','bar.col1'),'on',array('join_table.col2','=','bar.col2')),
-						array(array('join_table2','jt2'),array('jt2.col2','=','bar.col2'))
+						array(array('join_table2','jt2'),'on',array('jt2.col2','=','bar.col2'))
 					),//joins
 					array(),//where
 					array(),//group
 					array(),//order
-					'SELECT `col1`, `col2`, `col3` FROM `foo` AS `bar` JOIN `join_table1` ON `join_table1`.`col1` = `bar`.`col1` AND `join_table`.`col2` = `bar`.`col2` JOIN `join_table2` AS `jt2` ON `jt2`.`col2` = `bar`.`col2`'
+					'SELECT "col1", "col2", "col3" FROM "foo" AS "bar" JOIN "join_table1" ON "join_table1"."col1" = "bar"."col1" AND "join_table"."col2" = "bar"."col2" JOIN "join_table2" AS "jt2" ON "jt2"."col2" = "bar"."col2"'
 
 				)
 			);
+	}
+
+	/**
+	 * Tests Kohana_Database_Query_Builder_Select::test_select() 
+	 *
+	 * @test
+	 * @dataProvider provider_select
+	 * @param array  $cols  select columns  
+	 * @param array  $table table to apply from 
+	 */
+	public function test_select(array $select,array $from,array $joins, array $where,array $group, array $order, $expected){
+		$db = $this->getMockDatabase();
+		//create an instance of Database_Query_Builder_Select, dupping the compile method with null funcitonality, passing the select arguments
+		$query = DB::select()->select_array($select);//$this->getMock('Database_Query_Builder_Select',,array($select));
+		$this->assertAttributeSame($select, '_select', $query);//assert the select array was applied to the object
+
+		$query->from($from);
+		$this->assertAttributeSame(array($from), '_from', $query);//assert the from array was applied to the object
+
+		$this->_apply_joins($query,$joins);
+		//$this->assertAttributeSame($joins,'_join',$query);
+		
+
+		$sql = $query->compile($db);
+
+		$this->assertEquals($expected,$sql);
+
 	}
 
 	private function _apply_joins($query,$joins){
@@ -36,8 +63,7 @@ class Kohana_Database_Query_Builder_SelectTest extends Kohana_DatabaseTest{
 					$func = $join[$i];
 					$i++;
 					$args = $join[$i];
-
-					$query = $query_reflect->getMethod($func)->invokeArgs($query,$args);
+					$query_reflect->getMethod($func)->invokeArgs($query,$args);
 				}
 				
 
@@ -54,34 +80,6 @@ class Kohana_Database_Query_Builder_SelectTest extends Kohana_DatabaseTest{
 
 	}
 
-	/**
-	 * Tests Kohana_Database_Query_Builder_Select::test_select() 
-	 *
-	 * @test
-	 * @dataProvider provider_select
-	 * @param array  $cols  select columns  
-	 * @param array  $table table to apply from 
-	 */
-	public function test_select(array $select,array $from,array $joins, array $where,array $group, array $order, $expected){
-		$db = $this->getMockDatabase();
-
-		//create an instance of Database_Query_Builder_Select, dupping the compile method with null funcitonality, passing the select arguments
-		$query = $this->getMock('Database_Query_Builder_Select',array('compile'),array($select));
-		$this->assertAttributeSame($select, '_select', $query);//assert the select array was applied to the object
-
-		$query->from($from);
-		$this->assertAttributeSame(array($from), '_from', $query);//assert the from array was applied to the object
-
-		//$this->_apply_joins($query,$joins);
-		//$this->assertAttributeSame($joins,'_join',$query);
-		$query->expects($this->once())
-		         ->method('compile')
-		         ->with($db)
-		         ->will($this->returnValue($expected));//set expectations for the compile() method behavior
-
-		$sql = $query->compile($db);
-
-	}
 
 
 }
