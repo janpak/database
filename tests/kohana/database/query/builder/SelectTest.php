@@ -66,19 +66,19 @@ class Kohana_Database_Query_Builder_SelectTest extends Kohana_DatabaseTest{
 				array(),
 				array('foobar'),
 				array(array('baz','=','bam')),
-				'SELECT * FROM "foobar" WHERE "baz" = "bam"'
+				'SELECT * FROM "foobar" WHERE "baz" = \'bam\''
 			),
 			array(
 				array('col1','col2','col3'),
-				array('foo','bar'),
-				array('where',array('bar.col1','>','10'),'where',array('bar.col2','IN',array(1,2,3)) ),
-				'SELECT "col1", "col2", "col3" FROM "foo" AS "bar" WHERE "bar"."col1" > 10 AND "bar"."col2" IN (1,2,3)'
+				array(array('foo','bar')),
+				array('where',array('bar.col1','>',10),'where',array('bar.col2','IN',array(1,2,3)) ),
+				'SELECT "col1", "col2", "col3" FROM "foo" AS "bar" WHERE "bar"."col1" > 10 AND "bar"."col2" IN (1, 2, 3)'
 			),
 			array(
 				array(),
 				array('gah'),
 				array('where_open','where',array('col1','=','foo'),'or_where',array('col2','=',5),'where_close','and_where',array('col3','=',1)),
-				'SELECT * FROM "gah" WHERE ( "col1" = \'foo\' OR "col2" = 5 ) AND "col3" = 1'
+				'SELECT * FROM "gah" WHERE ("col1" = \'foo\' OR "col2" = 5) AND "col3" = 1'
 			)
 
 		);
@@ -99,29 +99,72 @@ class Kohana_Database_Query_Builder_SelectTest extends Kohana_DatabaseTest{
 		$select = $this->_select($select);
 		$this->_from($select,$froms);
 		$this->_where($select,$where);
+
+		$sql = $select->compile($this->getMockDatabase());
+
+		$this->assertEquals($expected,$sql);
 	}
 
-	protected function _join($query,$joins){
-		foreach($joins as $join){ 
-			$table = $join[0];
-			$query->join($table);
+	public function provider_select_from_join(){
+		return array(
+				array(
+				array(),
+				array('foobar'),
+				array(
+					array('bam',array(array('baz','=','bam'))),
+				),
+				'SELECT * FROM "foobar" JOIN "bam" ON "baz" = "bam"'
+			),
+			array(
+				array('col1','col2','col3'),
+				array(array('foo','bar')),
+				array(
+					array('gah',array('on',array('bar.col1','=','gah.col2'),'on',array('bar.col2','IN',array(1,2,3)) ))
+				),
+				'SELECT "col1", "col2", "col3" FROM "foo" AS "bar" JOIN "gah" ON "bar"."col1" = "gah"."col2" AND "bar"."col2" IN (1, 2, 3)'
+			),
+			array(
+				array(),
+				array('gah'),
+				array(
+					array('foo',array('on_open','on',array('col1','=','foo'),'or_on',array('col2','=',5),'on_close','on',array('col3','=',1))),
+				),
+				'SELECT * FROM "gah" JOIN "foo" ON ("col1" = "foo" OR "col2" = 5) AND "col3" = 1'
+			)
 
-			$query_reflect = new ReflectionClass($query);
-			for($i = 1;$i<count($join);$i++)
-			{
-				$func = null;
-				$args = array();
-				if(is_string($join[$i]) && $query_reflect->hasMethod($join[$i])){
-					$func = $join[$i];
-					$i++;
-					$args = $join[$i];
-					$query_reflect->getMethod($func)->invokeArgs($query,$args);
-				}
+		);
+
+	}
+
+	/**
+	 * Tests a select from join statement for Kohana_Database_Query_Builder_Select
+   * 
+   * @test
+   * @dataProvider provider_select_from_join
+   * @param array $select
+   * @param array $froms
+   * @param array $joins
+	 * @param string $expected
+   */
+	public function test_select_from_join(array $select,array $froms,array $joins,$expected){
+		$select = $this->_select($select);
+		$this->_from($select,$froms);
+		$this->_join($select,$joins);
+
+		$sql = $select->compile($this->getMockDatabase()); 
+
+		$this->assertEquals($expected,$sql);
+
+
+	}
+	protected function _join(Kohana_Database_Query_Builder_Select $select,array $joins){
+			foreach($joins as $join){
+				$select->join($join[0]);
+				$this->_condition_helper($select,$join[1],'on');
 
 			}
-
-		}
-
+			
+		return $select;
 	}
 
 	/**
@@ -141,33 +184,46 @@ class Kohana_Database_Query_Builder_SelectTest extends Kohana_DatabaseTest{
 	 * @return Kohana_Database_Query_Builder_Select
 	 */
 	protected function _where(Kohana_Database_Query_Builder_Select $select,array $wheres){
-		$reflect_select = new ReflectionClass($select);
-		for($i = 0; $i<count($wheres);$i++){
+		return $this->_condition_helper($select,$wheres,'where');	
+
+	}
+
+
+	/**
+	 * helper method for _where and _join, compiles a list of commands in $conditions together and applies them to the $object
+	 *
+	 * @param Kohana_Database_Query_Builder $object, an instance of Kohana_Database_Query_Builder_Select or Kohana_Database_Query_Builder_Join
+	 * @param array, $conditions, a list of commands
+	 * @param string $default, 'where'|'on'
+	 * @return Kohana_Database_Query_Builder
+	 *
+	 */
+	private function _condition_helper(Kohana_Database_Query_Builder $object,array $conditions,$default){
+		$reflect = new ReflectionClass($object);
+		for($i = 0; $i<count($conditions);$i++){
 			//if the current argument is a string and is a method of Kohana_Database_Query_Builder then apply the method to the object
-			if(is_string($wheres[$i]) && $reflect_select->hasMethod($wheres[$i])){
-				$func = $reflect_select->getMethod($wheres[$i]);
+			if(is_string($conditions[$i]) && $reflect->hasMethod($conditions[$i])){
+				$func = $reflect->getMethod($conditions[$i]);
 				$args =	array();
 
-				//if the ith + 1 argument  is an object or array, or if it's a string and not a method of Kohana_Database_Query_Builder_Select 
-				//then use ith + 1 argument as the arguments for $func
-				if(is_object($wheres[$i+1]) || is_array($wheres[$i+1]) || (is_string($wheres[$i+1]) && !$reflect_select->hasMethod($wheres[$i+1]))){
-					$args = $wheres[$i+1]; 
+				if(!is_string($conditions[$i+1]) || (is_string($conditions[$i+1]) && !$reflect->hasMethod($conditions[$i+1]))){
+					$args = $conditions[$i+1];
 					$i++;
+				}	
 
-				}
-
-				$func->invokeArgs($select,$args);
+				$func->invokeArgs($object,$args);
 
 			}
-			else if(is_array($wheres[$i])){
-				$func = $reflect_select->getMethod('where')->invokeArgs($select,$wheres[$i]); 
+			else if(is_array($conditions[$i])){
+				$func = $reflect->getMethod($default)->invokeArgs($object,$conditions[$i]); 
 
 			}
 
 		}
 
-		return $select;
+		return $object;
 	}
+
 
 
 	/**
