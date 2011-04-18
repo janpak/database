@@ -122,8 +122,9 @@ class Kohana_Database_Query_Builder_Join extends Database_Query_Builder {
 					$op = ' '.strtoupper($op);
 				}
 
+				$c2 = (is_array($c2) || preg_match('/^[0-9]+$/',$c2))?$db->quote($c2):$db->quote_column($c2);
 				// Quote each of the columns used for the condition
-				$conditions[] = $db->quote_column($c1).$op.' '.$db->quote_column($c2);
+				$conditions[] = $db->quote_column($c1).$op.' '.$c2;
 			}
 
 			// Concat the conditions "... AND ..."

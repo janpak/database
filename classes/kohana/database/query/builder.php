@@ -9,7 +9,6 @@
  * @license    http://kohanaphp.com/license
  */
 abstract class Kohana_Database_Query_Builder extends Database_Query {
-
 	/**
 	 * Compiles an array of JOIN statements into an SQL partial.
 	 *

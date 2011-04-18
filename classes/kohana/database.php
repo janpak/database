@@ -17,7 +17,6 @@
  * @license    http://kohanaphp.com/license
  */
 abstract class Kohana_Database {
-
 	// Query types
 	const SELECT =  1;
 	const INSERT =  2;
@@ -503,7 +502,6 @@ abstract class Kohana_Database {
 		{
 			// Convert to a string
 			$column = (string) $column;
-
 			if ($column === '*')
 			{
 				return $column;
@@ -528,6 +526,7 @@ abstract class Kohana_Database {
 
 				foreach ($parts as & $part)
 				{
+
 					if ($part !== '*')
 					{
 						// Quote each of the parts

@@ -45,7 +45,6 @@ class Kohana_Database_MySQL extends Database {
 
 		// Prevent this information from showing up in traces
 		unset($this->_config['connection']['username'], $this->_config['connection']['password']);
-
 		try
 		{
 			if ($persistent)

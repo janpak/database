@@ -55,6 +55,7 @@ class Kohana_Database_Query {
 		}
 		catch (Exception $e)
 		{
+			FB::log($e);
 			return Kohana_Exception::text($e);
 		}
 	}
@@ -189,7 +190,7 @@ class Kohana_Database_Query {
 
 		return $sql;
 	}
-
+	
 	/**
 	 * Execute the current query on the given database.
 	 *

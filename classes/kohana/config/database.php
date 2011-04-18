@@ -16,7 +16,7 @@
  * @license    http://kohanaphp.com/license
  */
 class Kohana_Config_Database extends Config_Reader {
-
+	
 	protected $_database_instance = 'default';
 
 	protected $_database_table = 'config';
