@@ -207,6 +207,7 @@ class Kohana_Database_Query {
 		}
 
 		// Compile the SQL query
+		
 		$sql = $this->compile($db);
 
 		if ($this->_lifetime !== NULL AND $this->_type === Database::SELECT)
